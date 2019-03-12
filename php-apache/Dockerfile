@@ -52,6 +52,4 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
 # curl https://pecl.php.net/get/redis-4.2.0.tgz -o redis-4.2.0.tgz
 # pecl install redis-4.2.0.tgz
 
-# 开启重写    
-# RUN a2enmod rewrite
 ENTRYPOINT [ "/var/www/ini.sh"]
