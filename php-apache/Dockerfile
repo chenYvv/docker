@@ -8,13 +8,17 @@ ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # php.ini
-COPY ./php.ini /usr/local/etc/php/php.ini
+COPY ./php.ini.bak /usr/local/etc/php/php.ini.bak
+
 # apache 配置
 COPY ./apache2.conf /etc/apache2/apache2.conf
 
+# ini.sh
+COPY ./ini.sh /var/www/
+
 # 扩展安装
 RUN apt-get update\
-    && apt-get install -y zlib1g-dev libxml2-dev cron\
+    && apt-get install -y zlib1g-dev libxml2-dev cron \
     && docker-php-ext-install mysqli pdo_mysql zip soap
 # sqlsrv扩展安装
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
@@ -26,10 +30,18 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
     && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile \
     && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc \
     && /bin/bash -c "source ~/.bashrc" \
-    && apt-get install -y unixodbc-dev 
-    # && pecl install sqlsrv \
-    # && pecl install pdo_sqlsrv \
-    # && pecl install redis
+    && apt-get install -y unixodbc-dev \
+    && cd /usr/local \
+    && a2enmod rewrite
+    # && curl https://pecl.php.net/get/sqlsrv-5.5.0preview.tgz -o sqlsrv-5.5.0preview.tgz \
+    # && pecl install sqlsrv-5.5.0preview.tgz \
+    # && echo extension=sqlsrv.so >> /usr/local/etc/php/php.ini\
+    # && pecl install pdo_sqlsrv-5.5.0preview.tgz \
+    # && echo extension=pdo_sqlsrv.so >> /usr/local/etc/php/php.ini\
+    # && pecl install -y redis-4.2.0.tgz \
+    # && echo extension=redis.so >> /usr/local/etc/php/php.ini \
+    # && a2enmod rewrite
+
 # pecl装不上，下载后安装
 # curl https://pecl.php.net/get/sqlsrv-5.5.0preview.tgz -o sqlsrv-5.5.0preview.tgz
 # pecl install sqlsrv-5.5.0preview.tgz
@@ -38,7 +50,8 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
 # pecl install pdo_sqlsrv-5.5.0preview.tgz
 
 # curl https://pecl.php.net/get/redis-4.2.0.tgz -o redis-4.2.0.tgz
-# pecl redis-4.2.0.tgz
+# pecl install redis-4.2.0.tgz
 
 # 开启重写    
-RUN a2enmod rewrite
+# RUN a2enmod rewrite
+ENTRYPOINT [ "/var/www/ini.sh"]
