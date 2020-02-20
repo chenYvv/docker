@@ -1,4 +1,4 @@
-FROM php:7.2.14-apache
+FROM php:7.3.6-apache
 
 # 工作目录
 WORKDIR /var/www/html
@@ -18,8 +18,9 @@ COPY ./ini.sh /var/www/
 
 # 扩展安装
 RUN apt-get update\
-    && apt-get install -y zlib1g-dev libxml2-dev cron \
-    && docker-php-ext-install mysqli pdo_mysql zip soap
+    && apt-get install -y zlib1g-dev libxml2-dev cron libfreetype6-dev libmcrypt-dev libjpeg-dev libpng-dev libzip-dev vim screen telnet net-tools\
+    && docker-php-ext-configure gd --enable-gd-native-ttf --with-freetype-dir=/usr/include/freetype2 --with-png-dir=/usr/include --with-jpeg-dir=/usr/include \
+    && docker-php-ext-install mysqli pdo_mysql zip soap gd pcntl
 # sqlsrv扩展安装
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
     && apt install -y gnupg apt-transport-https \
@@ -52,4 +53,6 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh \
 # curl https://pecl.php.net/get/redis-4.2.0.tgz -o redis-4.2.0.tgz
 # pecl install redis-4.2.0.tgz
 
+# 开启重写    
+# RUN a2enmod rewrite
 ENTRYPOINT [ "/var/www/ini.sh"]
